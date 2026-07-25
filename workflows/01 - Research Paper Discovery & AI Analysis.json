@@ -1,0 +1,734 @@
+{
+  "name": "01 - Research Paper Discovery & AI Analysis",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "AI Research Assistant",
+        "formDescription": "Enter your research interests to discover relevant academic papers, generate AI-powered summaries, identify key insights, and receive personalized research recommendations.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Research Topic",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Research Keywords"
+            },
+            {
+              "fieldLabel": "Research Goal",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Number of Papers",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "5"
+                  },
+                  {
+                    "option": "10"
+                  },
+                  {
+                    "option": "15"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email Address",
+              "fieldType": "email",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a21a7dfa-7af4-4289-ae65-e99ddd522c90",
+      "name": "On form submission",
+      "webhookId": "ce934ee9-f81d-4db9-95ff-abd82014a0a5"
+    },
+    {
+      "parameters": {
+        "url": "https://export.arxiv.org/api/query",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "search_query",
+              "value": "={{ 'all:\"' + $json[\"Research Topic\"] + '\"' + ($json[\"Research Keywords\"] ? ' AND all:(' + $json[\"Research Keywords\"].split(',').map(k => '\"' + k.trim() + '\"').join(' OR ') + ')' : '') }}"
+            },
+            {
+              "name": "start",
+              "value": "0"
+            },
+            {
+              "name": "max_results",
+              "value": "={{ $json[\"Number of Papers\"] }}"
+            },
+            {
+              "name": "sortBy",
+              "value": "submittedDate"
+            },
+            {
+              "name": "sortOrder",
+              "value": "descending"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "ed802a18-5eb2-4873-810e-156287288dab",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.xml",
+      "typeVersion": 1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "3fb78c63-aef9-49d7-a245-a8e66f94f274",
+      "name": "XML"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "feed.entry",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        624,
+        0
+      ],
+      "id": "8da1e77f-4ca2-4553-b795-9f87da9f7b81",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a0015207-0ef8-4389-a143-65d6b813ee1f",
+              "name": "Title",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "8fc2598d-ec9b-460a-8b1e-0c4a6f626bbf",
+              "name": "Abstract",
+              "value": "={{ $json.summary }}",
+              "type": "string"
+            },
+            {
+              "id": "7ba19342-0849-457e-9a2c-062b01fc9b30",
+              "name": "Authors",
+              "value": "={{ Array.isArray($json.author) ? $json.author.map(a => a.name).join(\", \") : $json.author?.name || \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "ee759226-a2a6-4191-8cb7-5c493ee63bc6",
+              "name": "Published Date",
+              "value": "={{ $json.published }}",
+              "type": "string"
+            },
+            {
+              "id": "3038cefa-690f-4af3-a3fc-b88b125113f2",
+              "name": "Paper URL",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "2c5515ac-ca40-4101-b84e-de492e57bde9",
+              "name": "PDF URL",
+              "value": "={{ $json.link.find(l => l.type === \"application/pdf\")?.href || \"\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        832,
+        0
+      ],
+      "id": "2255d3d0-4de8-4de5-a982-f177e8b9a570",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an AI Research Assistant.\n\nAnalyze the following academic research paper using only the information provided in its title and abstract.\n\nPaper Title:\n{{ $json[\"Title\"] }}\n\nAbstract:\n{{ $json[\"Abstract\"] }}\n\nProvide:\n1. A concise summary in 3-4 sentences.\n2. 3-5 key findings or contributions.\n3. 5 important keywords.\n4. The main research gap or limitation identified or implied by the paper.\n5. A brief explanation of why this paper may be useful to a researcher.\n\nDo not invent information that is not supported by the title or abstract.",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "fb5dc5cb-48ff-4b96-bf1c-d71657605006",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        976,
+        208
+      ],
+      "id": "dba29209-8eae-4f0d-af32-c3ae130670f7",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "pwqg64AlhK399vSm",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9cddd05b-2f06-449c-b9bd-fe0c6a639108",
+              "name": "AI Analysis",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1392,
+        0
+      ],
+      "id": "1759484a-3110-4341-8464-c3eab9ad3f8a",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1IuXOCbRR78JFJiJGYAbp7NjXKn5n2DtGnVu8xVKT8U8",
+          "mode": "list",
+          "cachedResultName": "AI Research Assistant - Research Repository",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IuXOCbRR78JFJiJGYAbp7NjXKn5n2DtGnVu8xVKT8U8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Research Papers",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IuXOCbRR78JFJiJGYAbp7NjXKn5n2DtGnVu8xVKT8U8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Title": "={{ $('Edit Fields').item.json.Title }}",
+            "Abstract": "={{ $('Edit Fields').item.json.Abstract }}",
+            "Authors": "={{ $('Edit Fields').item.json.Authors }}",
+            "Published Date": "={{ $('Edit Fields').item.json['Published Date'] }}",
+            "Paper URL": "={{ $('Edit Fields').item.json['Paper URL'] }}",
+            "PDF URL": "={{ $('Edit Fields').item.json['PDF URL'] }}",
+            "AI Analysis": "={{ $json[\"AI Analysis\"] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Abstract",
+              "displayName": "Abstract",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Authors",
+              "displayName": "Authors",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Published Date",
+              "displayName": "Published Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Paper URL",
+              "displayName": "Paper URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "PDF URL",
+              "displayName": "PDF URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "AI Analysis",
+              "displayName": "AI Analysis",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1600,
+        0
+      ],
+      "id": "9a7a0fe9-62cd-4f2e-bbe3-4d40c399fe43",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "6Fp9g3HuNreYHHrE",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "8pXAZHlRWIoIfwNf",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/8pXAZHlRWIoIfwNf",
+          "cachedResultName": "02 - AI Related Paper Recommendation Engine"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Research Topic": "={{ $('On form submission').item.json['Research Topic'] }}"
+          },
+          "matchingColumns": [
+            "Research Topic"
+          ],
+          "schema": [
+            {
+              "id": "Research Topic",
+              "displayName": "Research Topic",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        192,
+        224
+      ],
+      "id": "4e86fe22-13da-42f9-a0c6-6a3eab27ad58",
+      "name": "Call '02 - AI Related Paper Recommendation Engine'"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "EnuUSTvNigzxxIQ2",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/EnuUSTvNigzxxIQ2",
+          "cachedResultName": "03 - Research Insight Generator"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Research Topic": "={{ $('On form submission').item.json['Research Topic'] }}",
+            "Research Goal": "={{ $('On form submission').item.json['Research Goal'] }}",
+            "Paper Data": "={{ JSON.stringify($('Edit Fields1').all().map(item => item.json)) }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Research Topic",
+              "displayName": "Research Topic",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "Research Goal",
+              "displayName": "Research Goal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "Paper Data",
+              "displayName": "Paper Data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1664,
+        -192
+      ],
+      "id": "2ee1318c-2c62-412f-921d-8a63976774a6",
+      "name": "Call '03 - Research Insight Generator'"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "papers",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        -192
+      ],
+      "id": "e40ff73e-4732-4cc1-b8f8-5cc2fde1d746",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8285e3b9-a9a8-42f9-8eaa-ac317520c17f",
+              "name": "Research Insights",
+              "value": "={{ $json[\"Research Insights\"] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1872,
+        -192
+      ],
+      "id": "500db0ba-e315-4681-925e-7b543620f917",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Create a professional final research report based on the following information.\n\nResearch Topic:\n{{ $('On form submission').item.json['Research Topic'] }}\n\nResearch Goal:\n{{ $('On form submission').item.json['Research Goal'] }}\n\nResearch Insights:\n{{ $json['Research Insights'] }}\n\nStructure the report with:\n\n1. Executive Summary\n2. Key Research Themes\n3. Major Findings\n4. Research Gaps\n5. Emerging Trends\n6. Recommended Future Research Directions\n7. Conclusion\n\nMake the report clear, academic, well-structured, and concise.\nDo not invent findings that are not supported by the provided research insights.",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        2080,
+        -192
+      ],
+      "id": "5333680e-8eb7-433b-8d66-9be2e774056d",
+      "name": "Basic LLM Chain1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        2096,
+        -16
+      ],
+      "id": "a240e17a-b9de-4aa8-885b-704fe17d6b6b",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "pwqg64AlhK399vSm",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('On form submission').item.json['Email Address'] }}",
+        "subject": "={{ 'AI Research Report - ' + $('On form submission').item.json['Research Topic'] }}",
+        "message": "={{  '<h2>AI Research Assistant - Final Research Report</h2>' + '<p><strong>Research Topic:</strong> ' + $('On form submission').item.json['Research Topic'] + '</p>' + '<p><strong>Research Goal:</strong> ' + $('On form submission').item.json['Research Goal'] + '</p>' + '<hr>' + '<div style=\"white-space: pre-wrap;\">' + $json.text + '</div>' + '<hr>' + '<p><em>This report was generated by your AI Research Assistant.</em></p>' }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2432,
+        -192
+      ],
+      "id": "bd5ad9c6-1a39-4eca-8e28-fa21585038d3",
+      "name": "Send a message",
+      "webhookId": "598981d6-ce28-4375-9a87-50699609bba0",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "f64EhRi1H6MVK8bq",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Call '02 - AI Related Paper Recommendation Engine'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "XML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "XML": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call '03 - Research Insight Generator'": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Call '03 - Research Insight Generator'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain1": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "788572b0-a133-485a-834a-60fd7a19c6dd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6d1b4455c717d57291c4f6be8d17a444dcde43e0c3d9c95806b20561a84a3f7e"
+  },
+  "nodeGroups": [],
+  "id": "jOMQRZX89z8EcLD2",
+  "tags": []
+}
