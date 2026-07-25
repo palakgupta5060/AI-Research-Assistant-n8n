@@ -4,41 +4,39 @@
 ![OpenAI](https://img.shields.io/badge/OpenAI-GPT--5%20Mini-10A37F?style=for-the-badge&logo=openai&logoColor=white)
 ![arXiv](https://img.shields.io/badge/arXiv-API-B31B1B?style=for-the-badge)
 ![OpenAlex](https://img.shields.io/badge/OpenAlex-API-2563EB?style=for-the-badge)
-![MIT License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
+![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
 
-An AI-powered Research Assistant that automates literature review using **n8n**, **GPT-5 Mini**, **arXiv API**, **OpenAlex API**, **Google Sheets**, and **Gmail**.
-
-The system automatically searches research papers, generates AI-powered summaries, recommends additional papers, produces research insights, and emails a structured research report to the user.
+An AI-powered Research Assistant that automates literature discovery, paper summarization, research insight generation, and recommendation using **n8n**, **GPT-5 Mini**, **arXiv API**, **OpenAlex API**, **Google Sheets**, and **Gmail**.
 
 ---
 
 # 📖 Project Overview
 
-Conducting a literature review is one of the most time-consuming tasks in research. Researchers spend hours searching for relevant papers, reading abstracts, comparing findings, identifying research gaps, and organizing information.
+Academic literature review is one of the most time-consuming phases of research. Researchers spend hours searching papers, reading abstracts, extracting key findings, and identifying research gaps.
 
-This project automates the complete literature review process using workflow automation and Large Language Models.
+This project automates the complete literature review workflow using workflow automation and Large Language Models.
 
-The AI Research Assistant can:
+The AI Research Assistant performs:
 
-- 🔍 Search research papers automatically
-- 🤖 Generate AI-powered summaries
-- 📚 Recommend additional relevant papers
-- 💡 Produce consolidated research insights
-- 📊 Store analyzed papers in Google Sheets
-- 📧 Automatically email a professional research report
+- 🔍 Automatic research paper discovery
+- 🤖 AI-powered paper summarization
+- 📚 Related paper recommendation
+- 💡 Cross-paper research insight generation
+- 📊 Google Sheets storage
+- 📧 Automated email report delivery
 
 ---
 
 # 🚀 Features
 
-- Automated research paper discovery
+- Automated research paper search
 - AI-powered paper summarization
-- Related paper recommendation engine
-- Research insight generation
+- Research recommendation engine
+- Cross-paper insight generation
 - Google Sheets integration
-- Gmail report generation
+- Gmail integration
 - End-to-end workflow automation
-- Modular and scalable architecture
+- Modular multi-workflow architecture
 
 ---
 
@@ -50,64 +48,58 @@ The AI Research Assistant can:
                     ▼
       Workflow 1 – Research Paper Discovery
                     │
-                    ▼
-                arXiv API
-                    │
-                    ▼
-            GPT-5 Mini Analysis
-                    │
-                    ▼
-             Google Sheets Storage
-                    │
-                    ▼
-      Workflow 2 – Paper Recommendation
-                    │
-                    ▼
-              OpenAlex API
-                    │
-                    ▼
-          GPT Recommendation Engine
-                    │
-                    ▼
-      Workflow 3 – Research Insights
-                    │
-                    ▼
-        Final AI Research Report
-                    │
-                    ▼
-               Gmail Delivery
+         ┌──────────┴──────────┐
+         ▼                     ▼
+     arXiv API           Workflow 2
+         │               Recommendation
+         ▼                     │
+ GPT-5 Mini Analysis      OpenAlex API
+         │                     │
+         ▼                     ▼
+ Google Sheets          GPT Recommendation
+         │
+         ▼
+      Aggregate
+         │
+         ▼
+ Workflow 3 – Research Insight Generator
+         │
+         ▼
+ GPT-5 Mini Final Report
+         │
+         ▼
+ Gmail Delivery
 ```
 
 ---
 
-# 🔄 Workflow Description
+# 🔄 Workflow Overview
 
-## 📌 Workflow 1 – Research Paper Discovery
+### Workflow 01 – Research Paper Discovery & AI Analysis
 
-- Accepts user research topic
-- Searches research papers using the arXiv API
-- Parses XML responses
-- Generates AI-powered summaries using GPT-5 Mini
-- Stores analyzed papers in Google Sheets
-
----
-
-## 📌 Workflow 2 – Paper Recommendation Engine
-
-- Receives the research topic
-- Searches OpenAlex for related papers
-- Uses GPT to analyze relevance
-- Returns AI-generated recommendations
+- Accepts user research requests through an n8n form
+- Retrieves research papers using the arXiv API
+- Generates AI summaries using GPT-5 Mini
+- Stores results in Google Sheets
+- Invokes the recommendation and insight workflows
 
 ---
 
-## 📌 Workflow 3 – Research Insight Generator
+### Workflow 02 – AI Related Paper Recommendation Engine
 
-- Combines analyses from previous workflows
-- Identifies trends and key findings
-- Generates consolidated research insights
-- Produces the final report
-- Sends the report through Gmail
+- Searches OpenAlex
+- Evaluates paper relevance
+- Generates AI recommendations
+- Produces relevance scores and recommendations
+
+---
+
+### Workflow 03 – Research Insight Generator
+
+- Combines analyzed papers
+- Identifies research themes
+- Detects trends and research gaps
+- Generates the final research insights
 
 ---
 
@@ -119,11 +111,11 @@ The AI Research Assistant can:
 | GPT-5 Mini | AI Analysis |
 | OpenAI | Large Language Model |
 | arXiv API | Research Paper Search |
-| OpenAlex API | Related Paper Discovery |
+| OpenAlex API | Paper Recommendation |
 | Google Sheets | Data Storage |
-| Gmail | Email Delivery |
+| Gmail | Report Delivery |
 | HTTP Request | API Communication |
-| XML Parser | Response Processing |
+| XML Parser | XML Processing |
 
 ---
 
@@ -131,25 +123,14 @@ The AI Research Assistant can:
 
 ```text
 AI-Research-Assistant-n8n/
-
-│── workflows/
-│   ├── workflow-01-research-paper-discovery.json
-│   ├── workflow-02-paper-recommendation.json
-│   └── workflow-03-research-insights.json
-
-│── screenshots/
-│   ├── user-form.jpeg
-│   ├── workflow-01.jpeg
-│   ├── workflow-02.jpeg
-│   ├── workflow-03.jpeg
-│   ├── google-sheets-output.jpeg
-│   └── gmail-report.jpeg
-
-│── presentation/
-│── report/
-│── assets/
-│── docs/
-
+│
+├── assets/
+├── docs/
+├── presentation/
+├── report/
+├── screenshots/
+├── workflows/
+├── LICENSE
 └── README.md
 ```
 
@@ -163,21 +144,21 @@ AI-Research-Assistant-n8n/
 
 ---
 
-## Workflow 1
+## Workflow 01
 
-![Workflow 1](screenshots/workflow-01.jpeg)
-
----
-
-## Workflow 2
-
-![Workflow 2](screenshots/workflow-02.jpeg)
+![Workflow 01](screenshots/workflow-01.jpeg)
 
 ---
 
-## Workflow 3
+## Workflow 02
 
-![Workflow 3](screenshots/workflow-03.jpeg)
+![Workflow 02](screenshots/workflow-02.jpeg)
+
+---
+
+## Workflow 03
+
+![Workflow 03](screenshots/workflow-03.jpeg)
 
 ---
 
@@ -187,43 +168,61 @@ AI-Research-Assistant-n8n/
 
 ---
 
-## Final Email Report
+## Email Report
 
-![Gmail Report](screenshots/gmail-report.jpeg)
+![Email Report](screenshots/gmail-report.jpeg)
+
+---
+
+# 📄 Project Report
+
+The complete project documentation is available in the **report** folder.
+
+- AI_Research_Assistant_Report.pdf
+- AI_Research_Assistant_Report.docx
+
+---
+
+# 🎞️ Presentation
+
+The project presentation is available in the **presentation** folder.
+
+- AI_Research_Assistant_Presentation.pdf
+- AI_Research_Assistant_Presentation.pptx
 
 ---
 
 # ⚙️ Installation
 
-### 1. Clone the repository
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/palakgupta5060/AI-Research-Assistant-n8n.git
 ```
 
-### 2. Import the workflows
+### 2. Import Workflows
 
-Import all three JSON workflow files into your n8n instance.
+Import all three workflow JSON files into n8n.
 
-### 3. Configure credentials
+### 3. Configure Credentials
 
-Set up:
+Configure:
 
-- OpenAI API
+- OpenAI
 - Gmail
 - Google Sheets
 
-### 4. Activate the workflows
+### 4. Activate Workflows
 
-Activate all three workflows.
+Activate all workflows.
 
-### 5. Run the application
+### 5. Run
 
-Open the n8n Form, enter your research details, and submit the request.
+Open the n8n Form and submit your research topic.
 
 ---
 
-# 🎯 Example Input
+# 🎯 Sample Input
 
 **Research Topic**
 
@@ -235,19 +234,20 @@ LLMs, Medical Diagnosis, Clinical Decision Support, Healthcare AI
 
 **Research Goal**
 
-Analyze recent developments in Generative AI for healthcare, summarize key findings, identify emerging trends, and highlight future research opportunities.
+Analyze recent developments, summarize research findings, identify trends, and recommend future research directions.
 
 ---
 
 # 🔮 Future Scope
 
+- Retrieval-Augmented Generation (RAG)
+- Vector Database Integration
 - IEEE Xplore Integration
 - Springer Integration
-- PDF Research Paper Analysis
-- Automatic Citation Generation
-- Vector Database Integration
-- Retrieval-Augmented Generation (RAG)
-- Multi-Agent AI Research Assistant
+- Semantic Search
+- Citation Generator
+- PDF Report Generation
+- Multi-Agent AI System
 
 ---
 
@@ -257,14 +257,16 @@ Analyze recent developments in Generative AI for healthcare, summarize key findi
 
 B.Tech – Electronics & Computer Engineering
 
-Summer School Project – IIT Jammu
+Summer School – Generative AI & Large Language Models
+
+Indian Institute of Technology Jammu
 
 ---
 
-# 📄 License
+# 📜 License
 
-This project is licensed under the **MIT License**.
+This project is licensed under the MIT License.
 
 ---
 
-⭐ If you found this project useful, consider giving it a **Star** on GitHub!
+⭐ If you found this project interesting, feel free to **Star** the repository!
