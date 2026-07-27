@@ -39,6 +39,23 @@ The AI Research Assistant can:
 - Modular multi-workflow architecture
 
 ---
+# 🎥 Project Demo
+
+Watch the AI Research Assistant in action through the complete project demonstration.
+
+📹 **Demo Video**
+
+➡️ `presentation/AI_Research_Assistant_Demo.mp4`
+
+The demo showcases:
+
+- User input through the n8n form
+- Automated research paper discovery
+- AI-powered paper summarization
+- Related paper recommendation
+- Research insight generation
+- Google Sheets integration
+- Final AI-generated report delivered via Gmail
 
 # 🏗️ Overall System Architecture
 
